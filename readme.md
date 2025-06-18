@@ -1,12 +1,17 @@
 #k8 Playground
 
-Step 1: install kind, helm und docker and k8 
+#Step 1: install kind, helm und docker and k8 
 choco install kind kubernetes-cli kubernetes-helm docker-desktop -y
 
 
-Step 2: Create new cluster in kind
+#Step 2: Create new cluster in kind
 
-kind create cluster --name 01-cluster
+kind create cluster --name 01-cluster --config kind-config.yaml
+kubectl label node 01-cluster-control-plane ingress-ready=true --overwrite
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace --set controller.hostPort.enabled=true --set controller.service.type=NodePort
+
 
 Step 3: Check if cluster is there
 kubectl get nodes
@@ -20,8 +25,23 @@ Step3: Image in kind laden
 Step4: helm updaten
 helm upgrade --install myapp .\src\main\k8s\helm\myapp\ --namespace default
 
+helm upgrade --install myapp-mtls .\src\main\k8s\helm\mtls\ --namespace default
 
 
+Traefik:
+
+auch per helm
+
+Außerdem braucht man CRDs für das Cert und routing handling
+
+kubectl apply -f https://github.com/traefik/traefik/releases/download/v2.11.0/traefik-crds.yaml
+
+
+
+Wichtige Stolpersteine:
+
+Immer imagePullPolicy: Never setzen sonst will er immer das image aus dem Docker hub holen und für kind load docker-image nutzen.
+Achtung auch nie Ports im kind export die im Browser geblocked werden. Besser 8080 und 8443.
 
 
 Okay nicht jedes helm update führt ein neustart und ersetzen des Containers durch. Aber hier gäbe es ein Möglichkeit immer zu ersetzen.
@@ -83,3 +103,14 @@ NGINX Ingress	Der bekannteste Ingress Controller (basierend auf NGINX)
  
 Ein Ingress ist ein Reverse Proxy (z. B. Traefik, NGINX), der viele Dienste hinter einer gemeinsamen IP zugänglich macht – z. B. via Hostname oder Pfad.
 Er wir nicht unbedingt benötigt um System direkt an den loadbalancer an der Cloud zu binden. 
+
+
+
+
+The p4m projects you can have fun on your train:
+Browse .next Development China / porting-resource-collector - medavis Bitbucket - Collect resources by running windows docker container
+ 
+Browse .next Development China / portal-platform-containerization - medavis Bitbucket - Build linux docker containers based on the resource collected in previous project
+ 
+Browse China Dev Ops / AWS-infra-p4m-EKS - medavis Bitbucket - helm chart for running on minkube
+ 

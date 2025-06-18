@@ -1,0 +1,4 @@
+apiVersion: v2
+name: myapp_mtls
+description: Spring Boot App mit Traefik mTLS
+version: 0.1.0

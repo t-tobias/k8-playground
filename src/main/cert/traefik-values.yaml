@@ -1,0 +1,71 @@
+log:
+  level: DEBUG
+
+ports:
+  web:
+    port: 80
+    expose:
+      default: true
+  websecure:
+    port: 443
+    expose:
+      default: true
+  traefik:
+    port: 8081
+    expose:
+      default: true
+
+additionalArguments:
+  - "--providers.kubernetescrd"
+  - "--providers.kubernetescrd.namespaces=myapp"
+  - "--api=true"
+  - "--api.dashboard=true"
+  - "--api.insecure=true"
+  - "--accesslog=true"
+  - "--entrypoints.websecure.http.tls=true"
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: myapp-tls-secret
+
+tls:
+  options:
+    myclientauth:
+      clientAuth:
+        clientAuthType: RequireAndVerifyClientCert
+        caFiles:
+          - /ssl/ca.crt
+
+service:
+  type: ClusterIP
+
+deployment:
+    additionalVolumes:
+      - name: ssl
+        secret:
+          secretName: myapp-ca-secret
+    additionalVolumeMounts:
+      - name: ssl
+        mountPath: /ssl
+additionalVolumes:
+  - name: ssl
+    secret:
+      secretName: myapp-ca-secret
+additionalVolumeMounts:
+  - name: ssl
+    mountPath: /ssl
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    entryPoints:
+      - traefik
+
+accessLog:
+  enabled: true
+  fields:
+     general:
+       defaultMode: keep
+     headers:
+       defaultMode: keep

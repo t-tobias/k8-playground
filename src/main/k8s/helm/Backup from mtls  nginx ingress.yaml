@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp-ingress
+  namespace: myapp
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.tls.options: myapp-myclientauth@kubernetescrd
+spec:
+  rules:
+    - host: myapp.localtest.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: myapp
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - myapp.localtest.me
+      secretName: myapp-tls-secret
