@@ -1,4 +1,4 @@
-# 1️ Zertifikate generieren
+# Zertifikate generieren
 
 # Erstelle ein Verzeichnis
 mkdir certs && cd certs
@@ -41,14 +41,3 @@ Alternative workaround without CRD
 - kubectl create secret generic client-cert-secret `
   --from-file=client.crt=client.crt `
   --from-file=client.key=client.key -n kube-system
-
-
-
-# 2️⃣ Traefik via Helm installieren
-
-helm repo add traefik https://helm.traefik.io/traefik
-helm repo update
-
-helm upgrade traefik traefik/traefik `
-  --namespace kube-system `
-  -f traefik-values.yaml

@@ -13,9 +13,9 @@ kind load docker-image example/myapp-k8s:1.0.0 --name 01-cluster
 
 helm upgrade --install myapp-mtls .\src\main\resources\k8s\helm\mtls\ --namespace default
 
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-kubectl apply -f https://github.com/envoyproxy/gateway/releases/download/v1.4.2/install.yaml
+#kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
 
+kubectl apply -f https://github.com/envoyproxy/gateway/releases/download/v1.4.2/install.yaml
 kubectl apply --server-side -f https://github.com/envoyproxy/gateway/releases/download/v1.4.2/install.yaml
 
 
@@ -26,24 +26,20 @@ kubectl apply -f .\src\main\resources\k8s\helm\envoy\gatewayclass.yaml
 kubectl apply -f .\src\main\resources\k8s\helm\envoy\gateway.yaml  
 kubectl apply -f .\src\main\resources\k8s\helm\envoy\route.yaml     
 kubectl apply -f .\src\main\resources\k8s\helm\envoy\clientrafficpolicy.yaml
+kubectl apply -f .\src\main\resources\k8s\helm\envoy\ReferenceGran.yaml
 
 kubectl rollout restart deployment envoy-gateway -n envoy-gateway-system
 
 kubectl get crds
 
-# Portforwarding from nginx dataplane pod change hashcode from pod
-geht nicht -> kubectl port-forward pod/envoy-envoy-gateway-system-myapp-gateway-86fcab94-55c4f6c9fllbc 9443:443 -n envoy-gateway-system
-
-
-kubectl port-forward svc/envoy-envoy-gateway-system-myapp-gateway-86fcab94 \
-  9443:443 -n envoy-gateway-system
+# Portforwarding must be done over the service not direct using the pod because port is dynamic
+# take care to change the hash of the servicename 
+kubectl port-forward svc/envoy-envoy-gateway-system-myapp-gateway-86fcab94 9443:443 -n envoy-gateway-system
 
 # Test if mtls is behind the script must have the client.pfx which have the client.crt and client.key included.
 # client.pfx must be existing in current dir.
-curl -vk https://myapp.mtls.local:9443/hello --resolve myapp.mtls.local:9443:127.0.0.1 --cert-type P12 --cert client.pfx:123
+curl -vk https://myapp.localtest.me:9443/hello --cert-type P12 --cert .\src\main\resources\cert\client.pfx:123
 
-
-curl -vk https://myapp.localtest.me:9443/ --cert-type P12 --cert client.pfx:123
 
 Result:
 * Added myapp.mtls.local:9443:127.0.0.1 to DNS cache
@@ -70,7 +66,7 @@ Result:
 Hello from Spring Boot at 2025-07-30T13:41:26.177963232* Connection #0 to host myapp.mtls.local left intact
 
 # debugging why it is not working get tls cert from server is it the testCA cert with cn CN=myapp.localtest.me or the nginx default
-openssl s_client -connect localhost:9443 -servername myapp.mtls.local -showcerts
+openssl s_client -connect localhost:9443 -servername myapp.localtest.me -showcerts
 
 #  describe gateway to check if the certs are found
 kubectl describe gateway myapp-gateway -n envoy-gateway-system

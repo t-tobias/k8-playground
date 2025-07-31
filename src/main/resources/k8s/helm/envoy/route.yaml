@@ -6,13 +6,14 @@ metadata:
 spec:
   parentRefs:
     - name: myapp-gateway
+      namespace: envoy-gateway-system
   hostnames:
     - "myapp.localtest.me"
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /
+            value: /hello
       backendRefs:
         - name: myapp
           port: 80
