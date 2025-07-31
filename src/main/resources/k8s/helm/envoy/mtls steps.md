@@ -19,7 +19,7 @@ kubectl apply -f https://github.com/envoyproxy/gateway/releases/download/v1.4.2/
 kubectl apply --server-side -f https://github.com/envoyproxy/gateway/releases/download/v1.4.2/install.yaml
 
 
-kubectl create secret tls envoy --cert=server.crt --key=server.key -n envoy-gateway-system
+kubectl create secret tls myapp-tls --cert=server.crt --key=server.key -n envoy-gateway-system
 kubectl create secret generic mtls-ca --from-file=ca.crt=ca.crt -n envoy-gateway-system
 
 kubectl apply -f .\src\main\resources\k8s\helm\envoy\gatewayclass.yaml 
