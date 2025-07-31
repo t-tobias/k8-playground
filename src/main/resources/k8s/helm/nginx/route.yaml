@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: myapp-route
+  namespace: myapp
+spec:
+  parentRefs:
+    - name: myapp-gateway
+  hostnames:
+    - "myapp.mtls.local"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: myapp
+          port: 80

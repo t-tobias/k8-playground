@@ -23,9 +23,9 @@ Step2: docker build -t example/myapp-k8s:1.0.0 .
 Step3: Image in kind laden
  kind load docker-image example/myapp-k8s:1.0.0 --name 01-cluster
 Step4: helm updaten
-helm upgrade --install myapp .\src\main\k8s\helm\myapp\ --namespace default
+helm upgrade --install myapp .\src\main\resources\k8s\helm\myapp\ --namespace default
 
-helm upgrade --install myapp-mtls .\src\main\k8s\helm\mtls\ --namespace default
+helm upgrade --install myapp-mtls .\src\main\resources\k8s\helm\mtls\ --namespace default
 
 
 Traefik:
@@ -36,6 +36,17 @@ Außerdem braucht man CRDs für das Cert und routing handling
 
 kubectl apply -f https://github.com/traefik/traefik/releases/download/v2.11.0/traefik-crds.yaml
 
+
+
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install nginx-ingress ingress-nginx/ingress-nginx
+
+
+#kube anzeigen mit welchem k8s verbunden und wechseln
+
+kubectl config get-contexts
+kubectl config use-context kind-01-cluster
 
 
 Wichtige Stolpersteine:
